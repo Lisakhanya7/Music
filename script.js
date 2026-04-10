@@ -59,6 +59,7 @@ let activeGenre = 'All';
 let currentAudio = null;
 let previewAudio = null;
 let otpCode = null;
+let userDownloads = JSON.parse(localStorage.getItem('userDownloads') || '[]');
 
 const artistGrid = document.getElementById('artist-grid');
 const genreButtons = document.getElementById('genre-buttons');
@@ -231,11 +232,12 @@ function renderList(listId, items, isDownload = false) {
 }
 
 function renderDownloads() {
-  const downloads = [
+  const defaultDownloads = [
     { title: 'Future Bass Edit', artist: 'Lo-fi Dreamer', url: 'https://www.soundjay.com/music/beep-06.mp3' },
     { title: 'Dreamwave Melody', artist: 'Phonk Master', url: 'https://www.soundjay.com/music/beep-09.mp3' }
   ];
-  renderList('download-list', downloads, true);
+  const allDownloads = defaultDownloads.concat(userDownloads);
+  renderList('download-list', allDownloads, true);
 }
 
 function renderTrending() {
@@ -390,12 +392,40 @@ function renderProfileForm() {
 }
 
 function renderProfileDetails(profile) {
-  profileContent.innerHTML = `
+  let content = `
     <p><strong>Artist Name:</strong> ${profile.artistName}</p>
     <p><strong>Contact:</strong> ${profile.contact}</p>
     <p><strong>Status:</strong> ${profile.status}</p>
-    <button onclick="logout()">Sign Out</button>
   `;
+
+  if (profile.status === 'pending') {
+    content += `<button onclick="approveProfile()">Simulate Approval (Demo)</button>`;
+  }
+
+  content += `<button onclick="logout()">Sign Out</button>`;
+
+  if (profile.status === 'approved') {
+    content += `
+      <div class="upload-panel">
+        <h3>Upload Your Music</h3>
+        <p>Upload tracks to make them available for free download.</p>
+        <form id="upload-form" class="upload-form">
+          <label for="upload-file">Select audio file</label>
+          <input id="upload-file" type="file" accept="audio/*" />
+          <button type="submit">Upload Track</button>
+        </form>
+        <div id="upload-status" class="status-message"></div>
+      </div>
+    `;
+  }
+
+  profileContent.innerHTML = content;
+
+  // Re-attach event listener for upload form
+  const uploadForm = document.getElementById('upload-form');
+  if (uploadForm) {
+    uploadForm.addEventListener('submit', handleUpload);
+  }
 }
 
 function sendOtp() {
@@ -430,31 +460,66 @@ function logout() {
   renderProfilePanel();
 }
 
+function approveProfile() {
+  const profile = getSavedProfile();
+  if (profile) {
+    profile.status = 'approved';
+    saveProfile(profile);
+    renderProfilePanel();
+    alert('Profile approved! You can now upload music.');
+  }
+}
+
 signupForm.addEventListener('submit', (event) => {
   event.preventDefault();
   alert('Use the Profile section to sign in with OTP.');
 });
 
-uploadForm.addEventListener('submit', (event) => {
+function handleUpload(event) {
   event.preventDefault();
   const profile = getSavedProfile();
   if (!profile) {
-    uploadStatus.textContent = 'You need to sign in with OTP before uploading music.';
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) statusEl.textContent = 'You need to sign in with OTP before uploading music.';
     return;
   }
   if (profile.status !== 'approved') {
-    uploadStatus.textContent = 'Your profile is pending approval. Uploads will be accepted after email approval.';
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) statusEl.textContent = 'Your profile is pending approval. Uploads will be accepted after email approval.';
     return;
   }
   const fileInput = document.getElementById('upload-file');
   const file = fileInput.files[0];
   if (!file) {
-    uploadStatus.textContent = 'Please choose a song or album file to upload.';
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) statusEl.textContent = 'Please choose a song or album file to upload.';
     return;
   }
-  uploadStatus.textContent = `Uploaded “${file.name}” successfully. It will be available for free download after review.`;
-  fileInput.value = '';
-});
+
+  // Check file size (limit to 5MB for demo)
+  if (file.size > 5 * 1024 * 1024) {
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) statusEl.textContent = 'File too large. Please choose a file smaller than 5MB.';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+    const newDownload = {
+      title: file.name,
+      artist: profile.artistName,
+      url: dataUrl
+    };
+    userDownloads.push(newDownload);
+    localStorage.setItem('userDownloads', JSON.stringify(userDownloads));
+    renderDownloads();
+    const statusEl = document.getElementById('upload-status');
+    if (statusEl) statusEl.textContent = `Uploaded "${file.name}" successfully. It is now available for free download.`;
+    fileInput.value = '';
+  };
+  reader.readAsDataURL(file);
+}
 
 function performSearch() {
   const query = document.getElementById('global-search').value.toLowerCase();
