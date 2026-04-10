@@ -58,8 +58,9 @@ const playlists = [
 let activeGenre = 'All';
 let currentAudio = null;
 let previewAudio = null;
-let otpCode = null;
 let userDownloads = JSON.parse(localStorage.getItem('userDownloads') || '[]');
+let profiles = JSON.parse(localStorage.getItem('profiles') || '{}');
+let currentProfile = JSON.parse(localStorage.getItem('currentProfile') || 'null');
 
 const artistGrid = document.getElementById('artist-grid');
 const genreButtons = document.getElementById('genre-buttons');
@@ -120,12 +121,17 @@ function stopPreview() {
   }
 }
 
-function getSavedProfile() {
-  return JSON.parse(localStorage.getItem('artistProfile') || 'null');
+function getCurrentProfile() {
+  return currentProfile;
 }
 
-function saveProfile(profile) {
-  localStorage.setItem('artistProfile', JSON.stringify(profile));
+function saveCurrentProfile(profile) {
+  currentProfile = profile;
+  localStorage.setItem('currentProfile', JSON.stringify(profile));
+}
+
+function saveProfiles() {
+  localStorage.setItem('profiles', JSON.stringify(profiles));
 }
 
 function createArtistCard(artist) {
@@ -347,15 +353,15 @@ function renderArtistTab(artist, tabId) {
 }
 
 function renderProfilePanel() {
-  const profile = getSavedProfile();
+  const profile = getCurrentProfile();
   if (!profile) {
     artistProfilePanel.innerHTML = `
       <div>
-        <h3>Artist profile ready for signup</h3>
-        <p>Create your profile with a contact email or mobile number, then verify with OTP to sign in instantly.</p>
+        <h3>Artist profile</h3>
+        <p>Register or login to access your profile.</p>
       </div>
     `;
-    renderProfileForm();
+    renderAuthForms();
     return;
   }
 
@@ -364,45 +370,73 @@ function renderProfilePanel() {
 
   artistProfilePanel.innerHTML = `
     <div>
-      <h3>Welcome back, ${profile.artistName}</h3>
-      <p>Your profile is currently <strong>${statusText}</strong>.</p>
-      <p>If approved, you can upload music and publish tracks for free downloads.</p>
-      <div class="profile-status" style="border-color: ${statusColor}; background: rgba(34, 197, 94, 0.12); color: ${statusColor};">${statusText}</div>
+      <h3>Welcome back, ${profile.name} ${profile.surname}</h3>
+      <p>Your profile is active and approved.</p>
+      <p>You can upload music and publish tracks for free downloads.</p>
+      <div class="profile-status" style="border-color: #22c55e; background: rgba(34, 197, 94, 0.12); color: #22c55e;">Approved</div>
     </div>
   `;
   renderProfileDetails(profile);
 }
 
-function renderProfileForm() {
+function renderAuthForms() {
   const formContent = `
-    <form id="otp-signup-form" class="profile-form">
-      <label for="contactInput">Email or Mobile Number</label>
-      <input id="contactInput" type="text" placeholder="Enter your email or contact" required />
-      <button type="button" onclick="sendOtp()">Send OTP</button>
-    </form>
-    <div id="otpSection" class="otp-section hidden">
-      <label for="otpInput">Enter OTP</label>
-      <input id="otpInput" type="text" placeholder="Enter code" />
-      <button type="button" onclick="verifyOtp()">Verify OTP</button>
-      <p class="hint">A one-time code has been sent to your contact. Use it to sign in.</p>
-      <div id="otpFeedback" class="status-message"></div>
+    <div class="auth-tabs">
+      <button id="register-tab" class="active">Register</button>
+      <button id="login-tab">Login</button>
+    </div>
+    <div id="register-form" class="auth-form">
+      <h4>Register</h4>
+      <form id="registerForm" class="profile-form">
+        <label for="reg-name">Name</label>
+        <input id="reg-name" type="text" required />
+        <label for="reg-surname">Surname</label>
+        <input id="reg-surname" type="text" required />
+        <label for="reg-email">Email</label>
+        <input id="reg-email" type="email" required />
+        <button type="submit">Register</button>
+      </form>
+      <div id="register-status" class="status-message"></div>
+    </div>
+    <div id="login-form" class="auth-form hidden">
+      <h4>Login</h4>
+      <form id="loginForm" class="profile-form">
+        <label for="login-email">Email</label>
+        <input id="login-email" type="email" required />
+        <button type="submit">Login</button>
+      </form>
+      <div id="login-status" class="status-message"></div>
     </div>
   `;
   profileContent.innerHTML = formContent;
+
+  // Tab switching
+  document.getElementById('register-tab').addEventListener('click', () => {
+    document.getElementById('register-form').classList.remove('hidden');
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('register-tab').classList.add('active');
+    document.getElementById('login-tab').classList.remove('active');
+  });
+  document.getElementById('login-tab').addEventListener('click', () => {
+    document.getElementById('login-form').classList.remove('hidden');
+    document.getElementById('register-form').classList.add('hidden');
+    document.getElementById('login-tab').classList.add('active');
+    document.getElementById('register-tab').classList.remove('active');
+  });
+
+  // Form listeners
+  document.getElementById('registerForm').addEventListener('submit', handleRegister);
+  document.getElementById('loginForm').addEventListener('submit', handleLogin);
 }
 
 function renderProfileDetails(profile) {
   let content = `
-    <p><strong>Artist Name:</strong> ${profile.artistName}</p>
-    <p><strong>Contact:</strong> ${profile.contact}</p>
+    <p><strong>Name:</strong> ${profile.name}</p>
+    <p><strong>Surname:</strong> ${profile.surname}</p>
+    <p><strong>Email:</strong> ${profile.email}</p>
     <p><strong>Status:</strong> ${profile.status}</p>
+    <button onclick="logout()">Logout</button>
   `;
-
-  if (profile.status === 'pending') {
-    content += `<button onclick="approveProfile()">Simulate Approval (Demo)</button>`;
-  }
-
-  content += `<button onclick="logout()">Sign Out</button>`;
 
   if (profile.status === 'approved') {
     content += `
@@ -428,46 +462,53 @@ function renderProfileDetails(profile) {
   }
 }
 
-function sendOtp() {
-  const contactInput = document.getElementById('contactInput');
-  const contact = contactInput.value.trim();
-  if (!contact) {
-    alert('Please enter your email or mobile number.');
+function handleRegister(event) {
+  event.preventDefault();
+  const name = document.getElementById('reg-name').value.trim();
+  const surname = document.getElementById('reg-surname').value.trim();
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+
+  if (!name || !surname || !email) {
+    document.getElementById('register-status').textContent = 'Please fill all fields.';
     return;
   }
-  otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-  document.getElementById('otpSection').classList.remove('hidden');
-  document.getElementById('otpFeedback').textContent = `One-time password sent to ${contact}. Use code ${otpCode} for demo.`;
+
+  if (profiles[email]) {
+    document.getElementById('register-status').textContent = 'Email already registered.';
+    return;
+  }
+
+  const profile = { name, surname, email, status: 'approved' };
+  profiles[email] = profile;
+  saveProfiles();
+  saveCurrentProfile(profile);
+  renderProfilePanel();
+  alert('Registered and logged in successfully.');
 }
 
-function verifyOtp() {
-  const otpInput = document.getElementById('otpInput');
-  const entered = otpInput.value.trim();
-  if (entered === otpCode) {
-    const contact = document.getElementById('contactInput').value.trim();
-    const artistName = contact.split('@')[0] || contact;
-    saveProfile({ artistName, contact, status: 'pending' });
-    alert('OTP verified. You are signed in and awaiting approval.');
-    renderProfilePanel();
-    switchSection('home');
-  } else {
-    document.getElementById('otpFeedback').textContent = 'Incorrect code. Try again or resend OTP.';
+function handleLogin(event) {
+  event.preventDefault();
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+
+  if (!email) {
+    document.getElementById('login-status').textContent = 'Please enter email.';
+    return;
   }
+
+  if (!profiles[email]) {
+    document.getElementById('login-status').textContent = 'Email not found.';
+    return;
+  }
+
+  saveCurrentProfile(profiles[email]);
+  renderProfilePanel();
+  alert('Logged in successfully.');
 }
 
 function logout() {
-  localStorage.removeItem('artistProfile');
+  currentProfile = null;
+  localStorage.removeItem('currentProfile');
   renderProfilePanel();
-}
-
-function approveProfile() {
-  const profile = getSavedProfile();
-  if (profile) {
-    profile.status = 'approved';
-    saveProfile(profile);
-    renderProfilePanel();
-    alert('Profile approved! You can now upload music.');
-  }
 }
 
 signupForm.addEventListener('submit', (event) => {
@@ -477,15 +518,15 @@ signupForm.addEventListener('submit', (event) => {
 
 function handleUpload(event) {
   event.preventDefault();
-  const profile = getSavedProfile();
+  const profile = getCurrentProfile();
   if (!profile) {
     const statusEl = document.getElementById('upload-status');
-    if (statusEl) statusEl.textContent = 'You need to sign in with OTP before uploading music.';
+    if (statusEl) statusEl.textContent = 'You need to login before uploading music.';
     return;
   }
   if (profile.status !== 'approved') {
     const statusEl = document.getElementById('upload-status');
-    if (statusEl) statusEl.textContent = 'Your profile is pending approval. Uploads will be accepted after email approval.';
+    if (statusEl) statusEl.textContent = 'Your profile is not approved.';
     return;
   }
   const fileInput = document.getElementById('upload-file');
@@ -508,7 +549,7 @@ function handleUpload(event) {
     const dataUrl = e.target.result;
     const newDownload = {
       title: file.name,
-      artist: profile.artistName,
+      artist: `${profile.name} ${profile.surname}`,
       url: dataUrl
     };
     userDownloads.push(newDownload);

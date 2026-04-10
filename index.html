@@ -67,13 +67,13 @@
             <div class="hero-panel">
               <span class="eyebrow">Anti-Grid Music Discovery</span>
               <h1>Explore multiple artists, genres, and releases with smooth navigation.</h1>
-              <p>Instantly preview songs, sign up with OTP, upload music once approved, and let visitors download for free.</p>
+              <p>Instantly preview songs, register/login to upload music, and let visitors download for free.</p>
             </div>
 
             <div class="status-line">
-              <div class="status-pill">Artist sign-up with OTP-based login</div>
-              <div class="status-pill">Free uploads for approved artists</div>
-              <div class="status-pill">Browse Hip-Hop, Pop, Amapiano, R&B and more</div>
+              <div class="status-pill">Register with name, surname, email</div>
+              <div class="status-pill">Login with email only</div>
+              <div class="status-pill">One account per email</div>
             </div>
 
             <div id="artist-profile-panel" class="profile-card"></div>
@@ -81,19 +81,7 @@
             <div class="home-actions card">
               <div class="profile-form-panel">
                 <h3>Secure Artist Sign In</h3>
-                <p>Enter your email or mobile number below to receive a one-time password for instant access.</p>
-                <form id="signup-form" class="profile-form">
-                  <label for="contactInput">Contact</label>
-                  <input id="contactInput" type="text" placeholder="Email or mobile number" />
-                  <button type="button" onclick="sendOtp()">Send OTP</button>
-                </form>
-                <div id="otpSection" class="otp-section hidden">
-                  <label for="otpInput">One-time password</label>
-                  <input id="otpInput" type="text" placeholder="Enter OTP" />
-                  <button type="button" onclick="verifyOtp()">Verify OTP</button>
-                  <p class="hint">A verification code is sent to your contact for demo login.</p>
-                  <div id="otpFeedback" class="status-message"></div>
-                </div>
+                <p>Register with your name, surname, and email, or login with your email.</p>
               </div>
             </div>
 
