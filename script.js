@@ -138,12 +138,6 @@ function renderDownloads() {
   });
 }
 
-function validateSignupField(value) {
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const mobilePattern = /^(\+27|0)[6-8][0-9]{8}$/;
-  return emailPattern.test(value) || mobilePattern.test(value);
-}
-
 function renderProfilePanel() {
   const profile = getSavedProfile();
 
@@ -182,8 +176,8 @@ signupForm.addEventListener('submit', (event) => {
     return;
   }
 
-  if (!validateSignupField(emailOrMobile)) {
-    alert('Please enter a valid email or South African mobile number.');
+  if (!emailOrMobile) {
+    alert('Enter an email address or mobile number so we can contact you for approval.');
     return;
   }
 
