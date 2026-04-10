@@ -13,75 +13,197 @@
     </video>
     <div class="background-overlay"></div>
 
-    <header class="topbar">
-      <div class="brand">Music Label Hub</div>
-      <nav class="nav-links">
-        <a href="#home" onclick="showSection('home'); return false;">Home</a>
-        <a href="#signup" onclick="showSection('signup'); return false;">Sign Up</a>
-        <a href="#upload" onclick="showSection('upload'); return false;">Upload</a>
-        <a href="#download" onclick="showSection('download'); return false;">Download</a>
-      </nav>
-    </header>
-
-    <main class="content">
-      <section id="home" class="section active">
-        <div class="hero-panel">
-          <span class="eyebrow">Anti-Grid Music Discovery</span>
-          <h1>Find artists, preview tracks, and feel the vibe.</h1>
-          <p>Browse a curated roster of artists with animated cards, organic layouts, instant previews, and a live approval workflow.</p>
+    <div class="app-frame">
+      <aside class="sidebar">
+        <div class="sidebar-brand">Music Label Hub</div>
+        <div class="sidebar-nav">
+          <button onclick="switchSection('home')">Home</button>
+          <button onclick="switchSection('discover')">Search</button>
+          <button onclick="switchSection('library')">Library</button>
+          <button onclick="switchSection('create-playlist')">Create Playlist</button>
+          <button onclick="switchSection('favorites')">Liked Songs</button>
         </div>
 
-        <div class="status-line">
-          <div class="status-pill">Artist sign-up using email or South African mobile number</div>
-          <div class="status-pill">Free upload for approved artists</div>
-          <div class="status-pill">Visitors download free music instantly</div>
+        <div class="sidebar-section">
+          <h4>Playlists</h4>
+          <button onclick="switchSection('playlists')">Daily Vibes</button>
+          <button onclick="switchSection('playlists')">Late Night</button>
+          <button onclick="switchSection('playlists')">Studio Session</button>
         </div>
 
-        <div id="artist-profile-panel" class="profile-card"></div>
-
-        <div class="controls">
-          <div id="genre-buttons" class="filters"></div>
+        <div class="sidebar-section">
+          <h4>Recently Played</h4>
+          <div class="recent-item">Lo-fi Dreamer</div>
+          <div class="recent-item">Phonk Master</div>
         </div>
+      </aside>
 
-        <div id="artist-grid" class="artist-grid"></div>
-      </section>
+      <div class="main-area">
+        <header class="topbar">
+          <nav class="primary-nav">
+            <button onclick="switchSection('home')">Home</button>
+            <button onclick="switchSection('discover')">Browse</button>
+            <button onclick="switchSection('artists')">Artists</button>
+            <button onclick="switchSection('genres')">Genres</button>
+            <button onclick="switchSection('albums')">Albums</button>
+            <button onclick="switchSection('trending')">Trending</button>
+            <button onclick="switchSection('new-releases')">New Releases</button>
+            <button onclick="switchSection('favorites')">Favorites</button>
+            <button onclick="switchSection('playlists')">Playlists</button>
+            <button onclick="switchSection('profile')">Profile</button>
+          </nav>
 
-      <section id="signup" class="section">
-        <h2>Artist Sign Up</h2>
-        <form id="signup-form" class="card form-card">
-          <label for="artistName">Stage Name</label>
-          <input id="artistName" type="text" placeholder="Artist or project name" required />
+          <div class="topbar-actions">
+            <div class="search-group">
+              <input id="global-search" type="search" placeholder="Search artists, genres, albums..." />
+              <button onclick="performSearch()">Search</button>
+            </div>
+            <button class="icon-button" onclick="showNotification()">🔔</button>
+          </div>
+        </header>
 
-          <label for="emailOrMobile">Email or South African Mobile Number</label>
-          <input id="emailOrMobile" type="text" placeholder="name@example.com or 0XXXXXXXXX" required />
+        <main class="content">
+          <section id="home" class="section active">
+            <div class="hero-panel">
+              <span class="eyebrow">Anti-Grid Music Discovery</span>
+              <h1>Explore multiple artists, genres, and releases with smooth navigation.</h1>
+              <p>Instantly preview songs, sign up with OTP, upload music once approved, and let visitors download for free.</p>
+            </div>
 
-          <label for="password">Password</label>
-          <input id="password" type="password" placeholder="Minimum 6 characters" required />
+            <div class="status-line">
+              <div class="status-pill">Artist sign-up with OTP-based login</div>
+              <div class="status-pill">Free uploads for approved artists</div>
+              <div class="status-pill">Browse Hip-Hop, Pop, Amapiano, R&B and more</div>
+            </div>
 
-          <button type="submit">Create Profile</button>
-          <p class="hint">Your account will remain pending until approved by admin via email.</p>
-        </form>
-      </section>
+            <div id="artist-profile-panel" class="profile-card"></div>
 
-      <section id="upload" class="section">
-        <h2>Upload Songs & Albums</h2>
-        <div class="upload-instructions card">
-          <p>Only approved artists can upload music. Once approved, your tracks will be available for free download by visitors.</p>
-        </div>
-        <form id="upload-form" class="card form-card">
-          <label for="upload-file">Audio file</label>
-          <input id="upload-file" type="file" accept="audio/*" required />
-          <button type="submit">Upload For Free</button>
-        </form>
-        <div id="upload-status" class="status-message"></div>
-      </section>
+            <div class="home-actions card">
+              <div class="profile-form-panel">
+                <h3>Secure Artist Sign In</h3>
+                <p>Enter your email or mobile number below to receive a one-time password for instant access.</p>
+                <form id="signup-form" class="profile-form">
+                  <label for="contactInput">Contact</label>
+                  <input id="contactInput" type="text" placeholder="Email or mobile number" />
+                  <button type="button" onclick="sendOtp()">Send OTP</button>
+                </form>
+                <div id="otpSection" class="otp-section hidden">
+                  <label for="otpInput">One-time password</label>
+                  <input id="otpInput" type="text" placeholder="Enter OTP" />
+                  <button type="button" onclick="verifyOtp()">Verify OTP</button>
+                  <p class="hint">A verification code is sent to your contact for demo login.</p>
+                  <div id="otpFeedback" class="status-message"></div>
+                </div>
+              </div>
 
-      <section id="download" class="section">
-        <h2>Free Downloads</h2>
-        <div class="download-subtitle">Approved tracks are ready for anyone to download and enjoy.</div>
-        <div id="download-list" class="download-list"></div>
-      </section>
-    </main>
+              <div class="upload-panel">
+                <h3>Artist Upload Center</h3>
+                <p>Upload your track after approval to make it available for free download.</p>
+                <form id="upload-form" class="upload-form">
+                  <label for="upload-file">Select file</label>
+                  <input id="upload-file" type="file" accept="audio/*" />
+                  <button type="submit">Upload Track</button>
+                </form>
+                <div id="upload-status" class="status-message"></div>
+              </div>
+            </div>
+
+            <div class="section-grid">
+              <div class="preview-panel card">
+                <h3>Featured artists</h3>
+                <p>Click an artist card below to instant preview their sound and change the site vibe.</p>
+              </div>
+
+              <div class="genre-nav card">
+                <h3>Explore Genres</h3>
+                <div class="genre-buttons" id="genre-buttons"></div>
+              </div>
+            </div>
+
+            <div id="artist-grid" class="artist-grid"></div>
+          </section>
+
+          <section id="discover" class="section">
+            <h2>Browse & Discover</h2>
+            <div class="discover-grid">
+              <button onclick="prepareGenre('Hip-Hop')">Hip-Hop</button>
+              <button onclick="prepareGenre('Pop')">Pop</button>
+              <button onclick="prepareGenre('Amapiano')">Amapiano</button>
+              <button onclick="prepareGenre('R&B')">R&B</button>
+              <button onclick="prepareGenre('Phonk')">Phonk</button>
+              <button onclick="prepareGenre('Lo-fi')">Lo-fi</button>
+            </div>
+            <div id="discover-list" class="result-grid"></div>
+          </section>
+
+          <section id="artists" class="section">
+            <h2>Artists</h2>
+            <div class="artist-table card">
+              <div class="artist-grid" id="artists-list"></div>
+            </div>
+          </section>
+
+          <section id="genres" class="section">
+            <h2>Genres</h2>
+            <div class="chip-list">
+              <span>Hip-Hop</span>
+              <span>Pop</span>
+              <span>Amapiano</span>
+              <span>R&B</span>
+              <span>Phonk</span>
+              <span>Lo-fi</span>
+              <span>Electronic</span>
+            </div>
+          </section>
+
+          <section id="albums" class="section">
+            <h2>Albums</h2>
+            <div class="album-grid" id="album-list"></div>
+          </section>
+
+          <section id="trending" class="section">
+            <h2>Trending</h2>
+            <div class="list-cards" id="trending-list"></div>
+          </section>
+
+          <section id="new-releases" class="section">
+            <h2>New Releases</h2>
+            <div class="list-cards" id="releases-list"></div>
+          </section>
+
+          <section id="favorites" class="section">
+            <h2>Favorites</h2>
+            <div class="list-cards" id="favorite-list"></div>
+          </section>
+
+          <section id="playlists" class="section">
+            <h2>Playlists</h2>
+            <div class="list-cards" id="playlist-list"></div>
+          </section>
+
+          <section id="profile" class="section">
+            <h2>Your Profile</h2>
+            <div class="profile-container card">
+              <div id="profile-content"></div>
+            </div>
+          </section>
+
+          <section id="artist-detail" class="section">
+            <h2 id="detail-title">Artist Detail</h2>
+            <div class="tab-bar" id="artist-tabs"></div>
+            <div class="tab-content" id="artist-tab-content"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <nav class="mobile-nav">
+      <button onclick="switchSection('home')">🏠</button>
+      <button onclick="switchSection('discover')">🔍</button>
+      <button onclick="switchSection('library')">📚</button>
+      <button onclick="switchSection('playlists')">🎶</button>
+      <button onclick="switchSection('profile')">👤</button>
+    </nav>
   </div>
 
   <script src="script.js"></script>
