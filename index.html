@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Music Label Hub</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <video class="background-video" autoplay muted loop playsinline>
+      <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+    </video>
+    <div class="background-overlay"></div>
+
+    <header class="topbar">
+      <div class="brand">Music Label Hub</div>
+      <nav class="nav-links">
+        <a href="#home" onclick="showSection('home'); return false;">Home</a>
+        <a href="#signup" onclick="showSection('signup'); return false;">Sign Up</a>
+        <a href="#upload" onclick="showSection('upload'); return false;">Upload</a>
+        <a href="#download" onclick="showSection('download'); return false;">Download</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <section id="home" class="section active">
+        <div class="hero-panel">
+          <span class="eyebrow">Anti-Grid Music Discovery</span>
+          <h1>Find artists, preview tracks, and feel the vibe.</h1>
+          <p>Browse a curated roster of artists with animated cards, organic layouts, instant previews, and a live approval workflow.</p>
+        </div>
+
+        <div class="status-line">
+          <div class="status-pill">Artist sign-up using email or South African mobile number</div>
+          <div class="status-pill">Free upload for approved artists</div>
+          <div class="status-pill">Visitors download free music instantly</div>
+        </div>
+
+        <div id="artist-profile-panel" class="profile-card"></div>
+
+        <div class="controls">
+          <div id="genre-buttons" class="filters"></div>
+        </div>
+
+        <div id="artist-grid" class="artist-grid"></div>
+      </section>
+
+      <section id="signup" class="section">
+        <h2>Artist Sign Up</h2>
+        <form id="signup-form" class="card form-card">
+          <label for="artistName">Stage Name</label>
+          <input id="artistName" type="text" placeholder="Artist or project name" required />
+
+          <label for="emailOrMobile">Email or South African Mobile Number</label>
+          <input id="emailOrMobile" type="text" placeholder="name@example.com or 0XXXXXXXXX" required />
+
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="Minimum 6 characters" required />
+
+          <button type="submit">Create Profile</button>
+          <p class="hint">Your account will remain pending until approved by admin via email.</p>
+        </form>
+      </section>
+
+      <section id="upload" class="section">
+        <h2>Upload Songs & Albums</h2>
+        <div class="upload-instructions card">
+          <p>Only approved artists can upload music. Once approved, your tracks will be available for free download by visitors.</p>
+        </div>
+        <form id="upload-form" class="card form-card">
+          <label for="upload-file">Audio file</label>
+          <input id="upload-file" type="file" accept="audio/*" required />
+          <button type="submit">Upload For Free</button>
+        </form>
+        <div id="upload-status" class="status-message"></div>
+      </section>
+
+      <section id="download" class="section">
+        <h2>Free Downloads</h2>
+        <div class="download-subtitle">Approved tracks are ready for anyone to download and enjoy.</div>
+        <div id="download-list" class="download-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
